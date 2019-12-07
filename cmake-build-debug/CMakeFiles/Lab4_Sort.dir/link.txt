@@ -1,0 +1,1 @@
+/usr/local/bin/gcc-9  -fopenmp -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.14.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/Lab4_Sort.dir/main.c.o  -o Lab4_Sort 
