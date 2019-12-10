@@ -5,6 +5,8 @@
 #include <sys/time.h>
 #include <memory.h>
 
+// Changed to 100000, takes roughly 45 seconds total. Bubble sort is very inefficient
+// so I was unable to run more than this on my machine, maybe you will have better luck
 static const long Num_To_Sort = 100000;
 
 // Obtained from https://www.geeksforgeeks.org/bubble-sort/
