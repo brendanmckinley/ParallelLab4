@@ -5,9 +5,10 @@
 #include <sys/time.h>
 #include <memory.h>
 
-static const long Num_To_Sort = 10000;
+static const long Num_To_Sort = 100000;
 
-/* Function to print an array */
+// Obtained from https://www.geeksforgeeks.org/bubble-sort/
+// Used to verify that sort was functioning properly
 void printArray(int* arr)
 {
     int i;
@@ -26,6 +27,7 @@ void swap(int *xp, int *yp)
 
 // Sequential version of your sort
 // If you're implementing the PSRS algorithm, you may ignore this section
+// Obtained from https://www.geeksforgeeks.org/bubble-sort/
 void sort_s(int *arr) {
     int i, j;
     for (i = 0; i < Num_To_Sort-1; i++) {
@@ -38,14 +40,24 @@ void sort_s(int *arr) {
 }
 
 // Parallel version of your sort
+// Using algorithm from http://www.personal.kent.edu/~rmuhamma/Algorithms/MyAlgorithms/Sorting/bubbleSort.htm
 void sort_p(int *arr) {
-    int i, j;
-    #pragma omp parallel num_threads(omp_get_max_threads())
-    for (i = 0; i < Num_To_Sort-1; i++) {
-        // Last i elements are already in place
-        for (j = 0; j < Num_To_Sort - i - 1; j++) {
-            if (arr[j] > arr[j + 1])
-                swap(&arr[j], &arr[j + 1]);
+    int i, j, k;
+    #pragma omp parallel num_threads(2)
+    {
+        for (i = 0; i < Num_To_Sort - 1; i++) {
+            // split the sort into two different threads
+            if (omp_get_thread_num() == 0) {
+                for (j = 0; j < Num_To_Sort / 2; j++) {
+                    if (arr[2 * j] > arr[2 * j + 1])
+                        swap(&arr[2 * j], &arr[2 * j + 1]);
+                }
+            } else if (omp_get_thread_num() == 1) {
+                for (k = 0; k < Num_To_Sort / 2 - 1; k++) {
+                    if (arr[2 * k + 1] > arr[2 * k + 2])
+                        swap(&arr[2 * k + 1], &arr[2 * k + 2]);
+                }
+            }
         }
     }
 }
@@ -77,8 +89,6 @@ int main() {
     sort_s(arr_s);
     gettimeofday(&end, NULL);
     printf("Took %f seconds\n\n", end.tv_sec - start.tv_sec + (double) (end.tv_usec - start.tv_usec) / 1000000);
-
-    //printArray(arr_s);
 
     free(arr_s);
 
