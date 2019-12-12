@@ -5,7 +5,7 @@
 #include <sys/time.h>
 #include <memory.h>
 
-// Changed to 100000, takes roughly 45 seconds total. Bubble sort is very inefficient
+// Changed to 100000, takes roughly 1 minute total. Bubble sort is very inefficient
 // so I was unable to run more than this on my machine, maybe you will have better luck
 static const long Num_To_Sort = 100000;
 
@@ -29,36 +29,36 @@ void swap(int *xp, int *yp)
 
 // Sequential version of your sort
 // If you're implementing the PSRS algorithm, you may ignore this section
-// Obtained from https://www.geeksforgeeks.org/bubble-sort/
+// Obtained from http://web.engr.oregonstate.edu/~mjb/cs575/Handouts/bubblesort.2pp.pdf
 void sort_s(int *arr) {
     int i, j;
-    for (i = 0; i < Num_To_Sort-1; i++) {
-        // Last i elements are already in place
-        for (j = 0; j < Num_To_Sort - i - 1; j++) {
-            if (arr[j] > arr[j + 1])
+    for (i = 0; i < Num_To_Sort; i++) {
+        int flag = 1;
+        for (j = 0; j < Num_To_Sort - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
                 swap(&arr[j], &arr[j + 1]);
+                flag = 0;
+            }
+        }
+        if (flag == 1)
+        {
+            break;
         }
     }
 }
 
 // Parallel version of your sort
-// Using algorithm from http://www.personal.kent.edu/~rmuhamma/Algorithms/MyAlgorithms/Sorting/bubbleSort.htm
+// Using algorithm from http://web.engr.oregonstate.edu/~mjb/cs575/Handouts/bubblesort.2pp.pdf
 void sort_p(int *arr) {
-    int i, j, k;
-    #pragma omp parallel num_threads(2)
+    for (int i = 0; i < Num_To_Sort; i++)
     {
-        for (i = 0; i < Num_To_Sort - 1; i++) {
-            // split the sort into two different threads
-            if (omp_get_thread_num() == 0) {
-                for (j = 0; j < Num_To_Sort / 2; j++) {
-                    if (arr[2 * j] > arr[2 * j + 1])
-                        swap(&arr[2 * j], &arr[2 * j + 1]);
-                }
-            } else if (omp_get_thread_num() == 1) {
-                for (k = 0; k < Num_To_Sort / 2 - 1; k++) {
-                    if (arr[2 * k + 1] > arr[2 * k + 2])
-                        swap(&arr[2 * k + 1], &arr[2 * k + 2]);
-                }
+        int firstNumber = i % 2;
+#pragma omp parallel for default(none),shared(arr, Num_To_Sort, firstNumber)
+        for (int j = firstNumber; j < Num_To_Sort - 1; j+= 2)
+        {
+            if (arr[j] > arr[j + 1])
+            {
+                swap(&arr[j], &arr[j+1]);
             }
         }
     }
